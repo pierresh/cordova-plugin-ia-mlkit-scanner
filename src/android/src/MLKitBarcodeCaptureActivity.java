@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
@@ -99,14 +100,20 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
   public void onCreate(Bundle icicle) {
     super.onCreate(icicle);
 
-    // Hide the status bar and action bar.
-    View decorView = getWindow().getDecorView();
-    int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-    decorView.setSystemUiVisibility(uiOptions);
+    // Make status bar transparent
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      getWindow().setStatusBarColor(Color.TRANSPARENT);
+      getWindow().getDecorView().setSystemUiVisibility(
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+      );
+    } else {
+      // For older versions, just hide the status bar
+      getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    }
 
-    // Remember that you should never show the action bar if the
-    // status bar is hidden, so hide that too if necessary.
-    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    // Hide the action bar
     if (getActionBar() != null) {
       getActionBar().hide();
     }

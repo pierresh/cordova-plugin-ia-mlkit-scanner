@@ -78,6 +78,8 @@
 		<resource-file src="src/android/res/drawable/mlkit_vertical_line.xml" target="res/drawable/mlkit_vertical_line.xml" />
 		<resource-file src="src/android/res/drawable/mlkit_torch_active.xml" target="res/drawable/mlkit_torch_active.xml" />
 		<resource-file src="src/android/res/drawable/mlkit_torch_inactive.xml" target="res/drawable/mlkit_torch_inactive.xml" />
+		<resource-file src="src/android/res/drawable/mlkit_scanner_frame.xml" target="res/drawable/mlkit_scanner_frame.xml" />
+		<resource-file src="src/android/res/drawable/mlkit_scanning_animation.xml" target="res/drawable/mlkit_scanning_animation.xml" />
 		<framework src="androidx.appcompat:appcompat:1.1.0" />
 		<framework src="com.google.android.material:material:1.0.0" />
 		<framework src="com.google.mlkit:barcode-scanning:17.0.2" />

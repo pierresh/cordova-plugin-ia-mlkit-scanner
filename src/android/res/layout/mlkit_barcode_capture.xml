@@ -8,12 +8,9 @@
   android:orientation="vertical">
 
   <com.intelliacc.MLKitBarcodeScanner.camera.MLKitCameraSourcePreview
-
     android:id="@+id/preview"
     android:layout_width="match_parent"
-    android:layout_above="@+id/lytBarcode"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <com.intelliacc.MLKitBarcodeScanner.camera.MLKitGraphicOverlay
       android:id="@+id/graphicOverlay"
@@ -22,12 +19,32 @@
 
   </com.intelliacc.MLKitBarcodeScanner.camera.MLKitCameraSourcePreview>
 
+  <!-- Scanner Frame -->
+  <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/mlkit_scanner_frame" />
+
+  <!-- Scanning Animation -->
+  <ImageView
+    android:id="@+id/scanningLine"
+    android:layout_width="200dp"
+    android:layout_height="2dp"
+    android:layout_centerHorizontal="true"
+    android:layout_marginTop="300dp"
+    android:src="@drawable/mlkit_scanning_animation"
+    android:elevation="10dp"
+    android:alpha="1.0" />
+
+  <!-- Bottom Controls -->
   <LinearLayout
-    android:layout_width="fill_parent"
+    android:visibility="gone"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/lytBarcode"
     android:layout_alignParentBottom="true"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:background="#80000000">
 
     <EditText
       android:id="@+id/txtBarcode"
@@ -35,20 +52,32 @@
       android:layout_height="wrap_content"
       android:layout_weight="1"
       android:inputType="textNoSuggestions|textVisiblePassword"
-      android:textColor="#222428"
+      android:textColor="#FFFFFF"
       android:maxLines="1"
       android:imeOptions="actionGo"
       android:hint="@string/txtBarcode"
-      android:textColorHint="#989aa2"
+      android:textColorHint="#CCCCCC"
+      android:background="@android:color/transparent"
       android:autofillHints="none" />
+
+    <ImageButton
+      android:id="@+id/torchButton"
+      android:layout_width="48dp"
+      android:layout_height="48dp"
+      android:layout_marginStart="8dp"
+      android:background="?attr/selectableItemBackgroundBorderless"
+      android:src="@drawable/mlkit_torch_inactive"
+      android:contentDescription="Toggle Flash" />
 
     <Button
       android:id="@+id/submitBarcode"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
       android:background="#006aa6"
       android:textColor="#ffffff"
       android:text="@string/ok" />
+
   </LinearLayout>
 
 </RelativeLayout>

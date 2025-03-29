@@ -28,6 +28,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -60,6 +61,10 @@ import com.intelliacc.MLKitBarcodeScanner.camera.MLKitCameraSource2;
 import com.intelliacc.MLKitBarcodeScanner.camera.MLKitCameraSourcePreview;
 import com.intelliacc.MLKitBarcodeScanner.camera.MLKitGraphicOverlay;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.view.animation.AccelerateDecelerateInterpolator;
+
 public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
                                           implements MLKitBarcodeScanningProcessor.BarcodeUpdateListener {
   // ----------------------------------------------------------------------------
@@ -83,6 +88,8 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
   private MLKitGraphicOverlay<MLKitBarcodeGraphic> _GraphicOverlay      ;
   private ScaleGestureDetector           _ScaleGestureDetector;
   private GestureDetector                _GestureDetector     ;
+  private ImageView                      _ScanningLine        ;
+  private ObjectAnimator                 _ScanningAnimator    ;
 
   public List<String> globalBarcodes = new ArrayList<String>();
   // ----------------------------------------------------------------------------
@@ -116,6 +123,10 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
     _Preview.ViewFinderHeight = ViewFinderHeight;
     _GraphicOverlay = (MLKitGraphicOverlay<MLKitBarcodeGraphic>) findViewById(getResources().getIdentifier("graphicOverlay", "id", getPackageName()));
 
+    // Setup scanning animation
+    _ScanningLine = (ImageView) findViewById(getResources().getIdentifier("scanningLine", "id", getPackageName()));
+    setupScanningAnimation();
+
     // read parameters from the intent used to launch the activity.
     DetectionTypes = getIntent().getIntExtra("DetectionTypes", 1234);
     ViewFinderWidth = getIntent().getDoubleExtra("ViewFinderWidth", .5);
@@ -125,27 +136,20 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
 
     EditText txtBarcode = (EditText) findViewById(getResources().getIdentifier("txtBarcode", "id", getPackageName()));
     Button clickButton = (Button) findViewById(getResources().getIdentifier("submitBarcode", "id", getPackageName()));
-    clickButton.setOnClickListener( new View.OnClickListener() {
-
+    clickButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         onBarcodeDetected(String.valueOf(txtBarcode.getText()));
       }
     });
 
-
-    txtBarcode.setOnKeyListener(new View.OnKeyListener()
-    {
-      public boolean onKey(View v, int keyCode, KeyEvent event)
-      {
-        if (event.getAction() == KeyEvent.ACTION_DOWN)
-        {
-          switch (keyCode)
-          {
+    txtBarcode.setOnKeyListener(new View.OnKeyListener() {
+      public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+          switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
               onBarcodeDetected(String.valueOf(txtBarcode.getText()));
-
               return true;
             default:
               break;
@@ -198,7 +202,6 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
       }
     }
   }
-
 
   @Override
   public boolean onTouchEvent(MotionEvent e) {
@@ -259,7 +262,6 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
         setResult(CommonStatusCodes.ERROR, data);
       }
 
-
       finish();
     }
   }
@@ -278,6 +280,9 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
     super.onPause();
     if (_Preview != null) {
       _Preview.stop();
+    }
+    if (_ScanningAnimator != null) {
+      _ScanningAnimator.cancel();
     }
   }
 
@@ -384,5 +389,42 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
     public void onScaleEnd(ScaleGestureDetector detector) {
       _CameraSource.doZoom(detector.getScaleFactor());
     }
+  }
+
+  private void setupScanningAnimation() {
+    // Get the screen height to calculate animation range
+    int screenHeight = getResources().getDisplayMetrics().heightPixels;
+
+    // Calculate the animation range (center of screen ± 100dp)
+    float centerY = screenHeight / 2f;
+    float range = dpToPx(100); // 100dp range to cover a bit less than the full height of the scanning frame
+
+    // Ensure the scanning line is visible and centered
+    _ScanningLine.setVisibility(View.VISIBLE);
+    _ScanningLine.bringToFront();
+
+    // Set initial position to center
+    _ScanningLine.setTranslationY(0);
+
+    // Create and start the animation
+    _ScanningAnimator = ObjectAnimator.ofFloat(_ScanningLine, "translationY",
+        -range, range);
+    _ScanningAnimator.setDuration(1000); // 2 seconds for one complete cycle
+    _ScanningAnimator.setRepeatCount(ValueAnimator.INFINITE);
+    _ScanningAnimator.setRepeatMode(ValueAnimator.REVERSE);
+    _ScanningAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+    // Start the animation after a short delay
+    _ScanningLine.post(new Runnable() {
+        @Override
+        public void run() {
+            _ScanningAnimator.start();
+        }
+    });
+  }
+
+  private int dpToPx(int dp) {
+    float density = getResources().getDisplayMetrics().density;
+    return Math.round((float) dp * density);
   }
 }

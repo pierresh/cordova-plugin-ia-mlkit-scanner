@@ -3,34 +3,37 @@
 [![Latest Stable Version](https://img.shields.io/npm/v/cordova-plugin-ia-mlkit-scanner.svg) ](https://npm-stat.com/charts.html?package=cordova-plugin-ia-mlkit-scanner)
 [![Total Downloads](https://img.shields.io/npm/dt/cordova-plugin-ia-mlkit-scanner.svg)](https://npm-stat.com/charts.html?package=cordova-plugin-ia-mlkit-scanner)
 
-Scan barcodes using [Google MLKit](https://developers.google.com/ml-kit/vision/barcode-scanning). 
+Scan barcodes using [Google MLKit](https://developers.google.com/ml-kit/vision/barcode-scanning).
 
-This plugin supports the `android` and `ios` platforms.
+This plugin is improved version of [cordova-plugin-ia-mlkit-scanner](https://github.com/IntelliAcc/cordova-plugin-ia-mlkit-scanner) plugin.
 
-## Installation
+New features are:
+- replace red lines with a white rectangle
+- animation to simulate scanning
+- fullscreen (also includes status bar)
+- move torch button below the white rectangle
+- can display a prompt text in bottom of the screen
+
+Drawback:
+- only use back camera
+- remove the input box
+
+![Screenshot](screenshot.jpg)
+
+## Local installation
 
 ```
-cordova plugin add cordova-plugin-ia-mlkit-scanner
-```
+cordova plugin add https://github.com/pierresh/cordova-plugin-ia-mlkit-scanner
 
-If using Ionic:
-
-```
-ionic cordova plugin add cordova-plugin-ia-mlkit-scanner
 ```
 
 ## Usage
 
 ### Barcode Scanner
 
-To call up the barcode scanner, refer to this example code:
+To call up the barcode scanner, refer to this example code for Typescript:
 
 ```typescript
-enum CameraFacing {
-  BACK = 0,
-  FRONT = 1
-}
-
 function onSuccess(barcode) {
   console.log("Success:" + barcode);
 }
@@ -39,7 +42,7 @@ function onError(message) {
   console.log("Error:" + message);
 }
 
-window["MLKitBarcodeScanner"].scanBarcode(CameraFacing.FRONT, onSuccess, onError);
+(<any>window).window["MLKitBarcodeScanner"].scanBarcode({ prompt: "Scan a barcode"}, onSuccess, onError);
 ```
 
 ---
@@ -57,5 +60,5 @@ function onError(message) {
   console.log("Error: " + message);
 }
 
-window["MLKitBarcodeScanner"].checkSupport(onSuccess, onError);
+(<any>window).window["MLKitBarcodeScanner"].checkSupport(onSuccess, onError);
 ```

@@ -51,7 +51,7 @@ public class MLKitCameraSourcePreview extends ViewGroup {
                 _Context.getPackageName()));
         _TorchButton.layout(0, 0, dpToPx(45), dpToPx(45));
         _TorchButton.setMaxWidth(50);
-        _TorchButton.setRotation(90);
+        _TorchButton.setRotation(0);
 
         _TorchButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -173,9 +173,8 @@ public class MLKitCameraSourcePreview extends ViewGroup {
         int actualHeight = (int)(layoutHeight * ViewFinderHeight);
 
         int buttonSize = dpToPx(45);
-        int torchLeft = (int)layoutWidth / 2 + actualWidth / 2 + (layoutWidth - (layoutWidth / 2 + actualWidth / 2)) / 2
-                - buttonSize / 2;
-        int torchTop = layoutHeight - (layoutWidth - torchLeft);
+        int torchLeft = (layoutWidth - buttonSize) / 2;
+        int torchTop = (layoutHeight - buttonSize) / 2 + 100;
 
         _TorchButton.layout(torchLeft, torchTop, torchLeft + buttonSize, torchTop + buttonSize);
 

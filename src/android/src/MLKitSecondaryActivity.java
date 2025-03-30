@@ -63,6 +63,7 @@ public class MLKitSecondaryActivity extends Activity implements View.OnClickList
     intent.putExtra("ViewFinderWidth", getIntent().getDoubleExtra("ViewFinderWidth", .5));
     intent.putExtra("ViewFinderHeight", getIntent().getDoubleExtra("ViewFinderHeight", .7));
     intent.putExtra("CameraFacing", getIntent().getIntExtra("CameraFacing", 1));
+    intent.putExtra("PromptText", getIntent().getStringExtra("PromptText"));
     Log.d(TAG, "SecondaryActivity -> CameraFacing = " + getIntent().getIntExtra("CameraFacing", 1));
 
     startActivityForResult(intent, RC_BARCODE_CAPTURE);

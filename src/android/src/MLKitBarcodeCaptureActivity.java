@@ -30,6 +30,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -76,6 +77,7 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
   public              double  ViewFinderHeight = .7                     ;
   public static final String  BarcodeValue     = "FirebaseVisionBarcode";
   public              Integer CameraFacing     = 1                      ;
+  public              String  PromptText       = "";
 
   // ----------------------------------------------------------------------------
   // |  Private Properties
@@ -91,6 +93,7 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
   private GestureDetector                _GestureDetector     ;
   private ImageView                      _ScanningLine        ;
   private ObjectAnimator                 _ScanningAnimator    ;
+  private TextView                       _PromptText          ;
 
   public List<String> globalBarcodes = new ArrayList<String>();
   // ----------------------------------------------------------------------------
@@ -139,7 +142,19 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
     ViewFinderWidth = getIntent().getDoubleExtra("ViewFinderWidth", .5);
     ViewFinderHeight = getIntent().getDoubleExtra("ViewFinderHeight", .7);
     CameraFacing = getIntent().getIntExtra("CameraFacing", 1);
+    PromptText = getIntent().getStringExtra("PromptText");
     Log.d(TAG, "BarcodeCaptureActivity -> CameraFacing = " + CameraFacing);
+    Log.d(TAG, "BarcodeCaptureActivity -> PromptText = " + PromptText);
+
+    // Setup prompt text after we have the text from intent
+    _PromptText = (TextView) findViewById(getResources().getIdentifier("promptText", "id", getPackageName()));
+    if (_PromptText != null) {
+        _PromptText.setText(PromptText != null ? PromptText : "");
+        _PromptText.setVisibility(View.VISIBLE);
+        Log.d(TAG, "Prompt text view found and text set to: " + PromptText);
+    } else {
+        Log.e(TAG, "Prompt text view not found!");
+    }
 
     EditText txtBarcode = (EditText) findViewById(getResources().getIdentifier("txtBarcode", "id", getPackageName()));
     Button clickButton = (Button) findViewById(getResources().getIdentifier("submitBarcode", "id", getPackageName()));
@@ -233,6 +248,7 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
       ViewFinderWidth = getIntent().getDoubleExtra("ViewFinderWidth", .5);
       ViewFinderHeight = getIntent().getDoubleExtra("ViewFinderHeight", .7);
       CameraFacing = getIntent().getIntExtra("CameraFacing", 1);
+      PromptText = getIntent().getStringExtra("PromptText");
       Log.d(TAG, "onRequestPermissionsResult -> CameraFacing = " + CameraFacing);
 
       createCameraSource(true, false, CameraFacing);
@@ -316,13 +332,16 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
     MLKitBarcodeScanningProcessor scanningProcessor = new MLKitBarcodeScanningProcessor(scanner, this);
 
     Log.d(TAG, "createCameraSource -> CameraFacing = " + cameraFacing);
+    Log.d(TAG, "createCameraSource -> CameraFacing type = " + (cameraFacing != null ? cameraFacing.getClass().getName() : "null"));
+
     MLKitCameraSource2.Builder builder = new MLKitCameraSource2.Builder(getApplicationContext(), scanningProcessor)
-        .setFacing(cameraFacing)
+        .setFacing(cameraFacing != null ? cameraFacing : 1) // Ensure we have a default value
         .setRequestedPreviewSize(1600, 1024)
         .setRequestedFps(30.0f);
-//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
       builder = builder.setFocusMode(autoFocus ? Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE : null);
-//    }
+    }
 
     _CameraSource = builder.setFlashMode(useFlash ? Camera.Parameters.FLASH_MODE_TORCH : null).build();
   }
@@ -336,6 +355,7 @@ public final class MLKitBarcodeCaptureActivity extends    AppCompatActivity
 
     if (_CameraSource != null) {
       try {
+        Log.d(TAG, "Starting camera source with facing: " + CameraFacing);
         _Preview.start(_CameraSource, _GraphicOverlay);
       } catch (IOException e) {
         Log.e(TAG, "Unable to start camera source.", e);

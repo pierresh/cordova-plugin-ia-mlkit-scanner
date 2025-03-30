@@ -23,15 +23,15 @@ import javax.security.auth.callback.Callback;
 
 
 public class MLKitBarcodeScanner extends CordovaPlugin {
-    
+
     protected CallbackContext CallbackContext;
-    
+
     private static final int RC_BARCODE_CAPTURE = 9001;
-    
+
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
     }
-    
+
     /**
      * Check the device to make sure it has the Google Play Services APK. If
      * it doesn't, display a dialog that allows users to download the APK from
@@ -49,12 +49,12 @@ public class MLKitBarcodeScanner extends CordovaPlugin {
         }
         return true;
     }
-    
+
     @Override
     public boolean execute(String p_Action, JSONArray p_Args, CallbackContext p_CallbackContext) throws JSONException {
         Context context = cordova.getActivity().getApplicationContext();
         CallbackContext = p_CallbackContext;
-        
+
         if (p_Action.equals("scanBarcode")) {
             Thread thread = new Thread(new OneShotTask(context, p_Args));
             thread.start();
@@ -64,14 +64,14 @@ public class MLKitBarcodeScanner extends CordovaPlugin {
             CallbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, hasSupport));
             return true;
         }
-        
+
         return false;
     }
-    
+
     @Override
     public void onActivityResult(int p_RequestCode, int p_ResultCode, Intent p_Data) {
         super.onActivityResult(p_RequestCode, p_ResultCode, p_Data);
-        
+
         if (p_RequestCode == RC_BARCODE_CAPTURE) {
             if (p_ResultCode == CommonStatusCodes.SUCCESS) {
                 Intent d = new Intent();
@@ -86,33 +86,43 @@ public class MLKitBarcodeScanner extends CordovaPlugin {
             }
         }
     }
-    
+
     @Override
     public void onRestoreStateForActivityResult(Bundle state, CallbackContext callbackContext) {
         CallbackContext = callbackContext;
     }
-    
+
     private void openNewActivity(Context context, JSONArray args) {
         Intent intent = new Intent(context, MLKitSecondaryActivity.class);
-        intent.putExtra("DetectionTypes", args.optInt(2, 1234));
-        intent.putExtra("ViewFinderWidth", args.optDouble(1, .5));
-        intent.putExtra("ViewFinderHeight", args.optDouble(1, .7));
-        intent.putExtra("CameraFacing", args.optInt(0, 1));
-        
+
+        // Get parameters from args array, with proper defaults
+        int cameraFacing = args.optInt(0, 1);
+        double viewFinderWidth = args.optDouble(1, 0.5);
+        double viewFinderHeight = args.optDouble(2, 0.7);
+        int detectionTypes = args.optInt(3, 1234);
+        String promptText = args.optString(4, "");
+
+        // Put all parameters in the intent
+        intent.putExtra("DetectionTypes", detectionTypes);
+        intent.putExtra("ViewFinderWidth", viewFinderWidth);
+        intent.putExtra("ViewFinderHeight", viewFinderHeight);
+        intent.putExtra("CameraFacing", 0);
+        intent.putExtra("PromptText", promptText);
+
         this.cordova.setActivityResultCallback(this);
         this.cordova.startActivityForResult(this, intent, RC_BARCODE_CAPTURE);
     }
-    
+
     private class OneShotTask implements Runnable {
-        
+
         private Context _Context;
         private JSONArray _Args;
-        
+
         private OneShotTask(Context p_Context, JSONArray p_TaskArgs) {
             _Context = p_Context;
             _Args = p_TaskArgs;
         }
-        
+
         public void run() {
             openNewActivity(_Context, _Args);
         }
